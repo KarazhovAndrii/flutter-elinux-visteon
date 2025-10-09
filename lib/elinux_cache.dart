@@ -14,6 +14,7 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/runner/flutter_command.dart';
+import 'package:flutter_tools/src/base/file_system_utils.dart';
 import 'package:process/process.dart';
 
 mixin ELinuxRequiredArtifacts on FlutterCommand {
@@ -137,7 +138,18 @@ class ELinuxEngineArtifacts extends EngineCachedArtifact {
 
     final String? overrideLocal = _platform.environment['ELINUX_ENGINE_BASE_LOCAL_DIRECTORY'];
     if (overrideLocal != null) {
-      await _downloadArtifactsFromLocal(operatingSystemUtils, overrideLocal);
+      final Directory localDir = fileSystem.directory(overrideLocal);
+      if (!localDir.existsSync()) {
+        throwToolExit(
+            'ELINUX_ENGINE_BASE_LOCAL_DIRECTORY is set to "$overrideLocal" but the directory does not exist.');
+      }
+      final bool hasZipArchives = getBinaryDirs()
+          .any((List<String> toolsDir) => localDir.childFile(toolsDir[1]).existsSync());
+      if (hasZipArchives) {
+        await _downloadArtifactsFromLocal(operatingSystemUtils, overrideLocal);
+      } else {
+        await _copyArtifactsFromLocalDirectory(localDir, operatingSystemUtils);
+      }
       return;
     }
 
@@ -197,6 +209,27 @@ class ELinuxEngineArtifacts extends EngineCachedArtifact {
       if (file.basename == 'gen_snapshot') {
         operatingSystemUtils.chmod(file, 'a+r,a+x');
       }
+    }
+  }
+
+  Future<void> _copyArtifactsFromLocalDirectory(
+    Directory sourceRoot,
+    OperatingSystemUtils operatingSystemUtils,
+  ) async {
+    _logger.printStatus('Copying elinux artifacts from local directory...');
+    for (final List<String> toolsDir in getBinaryDirs()) {
+      final String cacheDir = toolsDir[0];
+      final Directory srcDir = sourceRoot.childDirectory(cacheDir);
+      if (!srcDir.existsSync()) {
+        _logger.printTrace('Skipping $cacheDir (not found under ${sourceRoot.path}).');
+        continue;
+      }
+      final Directory destDir = location.childDirectory(cacheDir);
+      if (destDir.existsSync()) {
+        destDir.deleteSync(recursive: true);
+      }
+      copyDirectory(srcDir, destDir);
+      _makeFilesExecutable(destDir, operatingSystemUtils);
     }
   }
 }
