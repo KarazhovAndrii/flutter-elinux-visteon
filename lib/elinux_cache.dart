@@ -14,7 +14,6 @@ import 'package:flutter_tools/src/features.dart';
 import 'package:flutter_tools/src/flutter_cache.dart';
 import 'package:flutter_tools/src/globals.dart' as globals;
 import 'package:flutter_tools/src/runner/flutter_command.dart';
-import 'package:flutter_tools/src/base/file_system_utils.dart';
 import 'package:process/process.dart';
 
 mixin ELinuxRequiredArtifacts on FlutterCommand {

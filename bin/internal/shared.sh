@@ -89,9 +89,9 @@ function update_flutter_elinux() {
 
   if [[ ! -f "$SNAPSHOT_PATH" || ! -s "$stamp_path" || "$revision" != "$(cat "$stamp_path")" 
         || "$ROOT_DIR/pubspec.yaml" -nt "$ROOT_DIR/pubspec.lock" ]]; then
-    echo "Running pub upgrade..."
-    (cd "$ROOT_DIR" && "$FLUTTER_EXE" pub upgrade) || {
-      >&2 echo "Error: Unable to 'pub upgrade' flutter-elinux."
+    echo "Running pub get (offline)..."
+    (cd "$ROOT_DIR" && "$FLUTTER_EXE" pub get --offline) || {
+      >&2 echo "Error: Unable to 'pub get' flutter-elinux."
       exit 1
     }
 

@@ -1,6 +1,9 @@
 # fetched flutter repo
 flutter/
 
+# locally deployed engine
+bin/local_engine/
+
 # Miscellaneous
 *.class
 *.lock
