@@ -3,6 +3,7 @@ flutter/
 
 # locally deployed engine
 bin/local_engine/
+bin/local_engine.bak.*
 
 # Miscellaneous
 *.class
