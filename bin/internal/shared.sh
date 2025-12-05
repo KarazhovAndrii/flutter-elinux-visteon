@@ -26,9 +26,16 @@ fi
 ROOT_DIR="$(cd "${BIN_DIR}/.." ; pwd -P)"
 FLUTTER_DIR="$ROOT_DIR/flutter"
 SNAPSHOT_PATH="$ROOT_DIR/bin/cache/flutter-elinux.snapshot"
+LOCAL_ENGINE_DIR="$ROOT_DIR/bin/local_engine"
 
 FLUTTER_EXE="$FLUTTER_DIR/bin/flutter"
 DART_EXE="$FLUTTER_DIR/bin/cache/dart-sdk/bin/dart"
+
+# Prefer the locally built eLinux engine artifacts when available so newly
+# created projects pick up the in-repo embedder headers/APIs by default.
+if [[ -z "$ELINUX_ENGINE_BASE_LOCAL_DIRECTORY" && -d "$LOCAL_ENGINE_DIR" ]]; then
+  export ELINUX_ENGINE_BASE_LOCAL_DIRECTORY="$LOCAL_ENGINE_DIR"
+fi
 
 function update_flutter() {
   if [[ -e "$FLUTTER_DIR" && ! -d "$FLUTTER_DIR/.git" ]]; then
