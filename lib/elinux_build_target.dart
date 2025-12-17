@@ -344,12 +344,44 @@ class NativeBundle {
     final String? targetCompilerFlags = buildInfo!.targetCompilerFlags;
     final String? targetToolchain = buildInfo!.targetToolchain;
     final String? systemIncludeDirectories = buildInfo!.systemIncludeDirectories;
+
+    final String cCompiler = (targetToolchain == null) ? 'clang' : '$targetToolchain/bin/clang';
+    final String cxxCompiler =
+        (targetToolchain == null) ? 'clang++' : '$targetToolchain/bin/clang++';
+
+    // CMake reliably switches into "target processor != host processor" mode
+    // when those settings are provided via a toolchain file processed before
+    // the first project() call. Without this, some subprojects may still see
+    // the host processor and force host compilers (e.g. g++), breaking cross
+    // builds.
+    final bool isCrossCompiling = buildInfo!.targetArch != hostArch;
+    final File toolchainFile = outputDir.childFile('flutter_elinux_toolchain.cmake');
+    if (isCrossCompiling) {
+      toolchainFile.writeAsStringSync('''
+set(CMAKE_SYSTEM_NAME Linux)
+set(CMAKE_SYSTEM_PROCESSOR $targetArch)
+
+set(CMAKE_SYSROOT "$targetSysroot")
+set(CMAKE_FIND_ROOT_PATH "$targetSysroot" CACHE STRING "" FORCE)
+
+set(CMAKE_C_COMPILER "$cCompiler")
+set(CMAKE_CXX_COMPILER "$cxxCompiler")
+
+set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
+set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
+set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
+''');
+    }
     RunResult result = await _processUtils.run(
       <String>[
         'cmake',
         '-DCMAKE_BUILD_TYPE=$cmakeBuildType',
         '-DFLUTTER_TARGET_BACKEND_TYPE=${buildInfo!.targetBackendType}',
         '-DFLUTTER_TARGET_PLATFORM=elinux-${buildInfo!.targetArch}',
+        if (isCrossCompiling) '-DCMAKE_TOOLCHAIN_FILE=${toolchainFile.path}',
+        '-DCMAKE_C_COMPILER=$cCompiler',
+        '-DCMAKE_CXX_COMPILER=$cxxCompiler',
         if (targetSysroot != '/') '-DCMAKE_SYSROOT=$targetSysroot',
         if (buildInfo!.targetArch != hostArch) '-DCMAKE_SYSTEM_PROCESSOR=$targetArch',
         if (systemIncludeDirectories != null)
@@ -362,10 +394,10 @@ class NativeBundle {
       ],
       workingDirectory: outputDir.path,
       environment: (targetToolchain == null)
-          ? <String, String>{'CC': 'clang', 'CXX': 'clang++'}
+          ? <String, String>{'CC': cCompiler, 'CXX': cxxCompiler}
           : <String, String>{
-              'CC': '$targetToolchain/bin/clang',
-              'CXX': '$targetToolchain/bin/clang++'
+              'CC': cCompiler,
+              'CXX': cxxCompiler,
             },
     );
     if (result.exitCode != 0) {

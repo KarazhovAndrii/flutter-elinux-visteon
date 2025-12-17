@@ -93,9 +93,15 @@ function update_flutter_elinux() {
 
   local revision="$(git --git-dir="$ROOT_DIR/.git" rev-parse HEAD)"
   local stamp_path="$ROOT_DIR/bin/cache/flutter-elinux.stamp"
+  local sources_changed=0
+  if [[ -f "$SNAPSHOT_PATH" ]]; then
+    if find "$ROOT_DIR/lib" "$ROOT_DIR/bin" "$ROOT_DIR/packages" -name '*.dart' -newer "$SNAPSHOT_PATH" -print -quit 2>/dev/null | grep -q .; then
+      sources_changed=1
+    fi
+  fi
 
   if [[ ! -f "$SNAPSHOT_PATH" || ! -s "$stamp_path" || "$revision" != "$(cat "$stamp_path")" 
-        || "$ROOT_DIR/pubspec.yaml" -nt "$ROOT_DIR/pubspec.lock" ]]; then
+        || "$ROOT_DIR/pubspec.yaml" -nt "$ROOT_DIR/pubspec.lock" || "$sources_changed" == "1" ]]; then
     echo "Running pub get (offline)..."
     (cd "$ROOT_DIR" && "$FLUTTER_EXE" pub get --offline) || {
       >&2 echo "Error: Unable to 'pub get' flutter-elinux."

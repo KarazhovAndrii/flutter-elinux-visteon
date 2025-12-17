@@ -1,8 +1,7 @@
 # fetched flutter repo
 flutter/
 
-# locally deployed engine
-bin/local_engine/
+# local engine backup
 bin/local_engine.bak.*
 
 # Miscellaneous
