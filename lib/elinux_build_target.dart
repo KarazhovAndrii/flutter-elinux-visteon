@@ -342,6 +342,7 @@ class NativeBundle {
     final String? targetCompilerTriple = buildInfo!.targetCompilerTriple;
     final String targetSysroot = buildInfo!.targetSysroot;
     final String? targetCompilerFlags = buildInfo!.targetCompilerFlags;
+    final String? targetLinkerFlags = buildInfo!.targetLinkerFlags;
     final String? targetToolchain = buildInfo!.targetToolchain;
     final String? systemIncludeDirectories = buildInfo!.systemIncludeDirectories;
 
@@ -390,6 +391,9 @@ set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
         if (targetCompilerTriple != null) '-DCMAKE_CXX_COMPILER_TARGET=$targetCompilerTriple',
         if (targetCompilerFlags != null) '-DCMAKE_C_FLAGS=$targetCompilerFlags',
         if (targetCompilerFlags != null) '-DCMAKE_CXX_FLAGS=$targetCompilerFlags',
+        if (targetLinkerFlags != null) '-DCMAKE_EXE_LINKER_FLAGS=$targetLinkerFlags',
+        if (targetLinkerFlags != null) '-DCMAKE_SHARED_LINKER_FLAGS=$targetLinkerFlags',
+        if (targetLinkerFlags != null) '-DCMAKE_MODULE_LINKER_FLAGS=$targetLinkerFlags',
         eLinuxDir.path,
       ],
       workingDirectory: outputDir.path,

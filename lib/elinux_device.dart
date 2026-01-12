@@ -321,6 +321,7 @@ class ELinuxDevice extends Device {
       targetCompilerTriple: null,
       targetSysroot: '/',
       targetCompilerFlags: null,
+      targetLinkerFlags: null,
       targetToolchain: null,
       systemIncludeDirectories: null,
     );

@@ -37,6 +37,7 @@ class ELinuxBuildInfo {
     required this.targetCompilerTriple,
     required this.targetSysroot,
     required this.targetCompilerFlags,
+    required this.targetLinkerFlags,
     required this.targetToolchain,
     required this.systemIncludeDirectories,
   });
@@ -47,6 +48,7 @@ class ELinuxBuildInfo {
   final String? targetCompilerTriple;
   final String targetSysroot;
   final String? targetCompilerFlags;
+  final String? targetLinkerFlags;
   final String? targetToolchain;
   final String? systemIncludeDirectories;
 }

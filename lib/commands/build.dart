@@ -80,6 +80,11 @@ class BuildPackageCommand extends BuildSubCommand with ELinuxExtension, ELinuxRe
       'target-compiler-flags',
       help: 'The extra compile flags to be applied to C and C++ compiler',
     );
+    argParser.addOption(
+      'target-linker-flags',
+      help: 'The extra linker flags to be applied when linking native binaries '
+          'and shared libraries.',
+    );
   }
 
   @override
@@ -123,6 +128,7 @@ class BuildPackageCommand extends BuildSubCommand with ELinuxExtension, ELinuxRe
       targetCompilerTriple: stringArg('target-compiler-triple'),
       targetSysroot: stringArg('target-sysroot')!,
       targetCompilerFlags: stringArg('target-compiler-flags'),
+      targetLinkerFlags: stringArg('target-linker-flags'),
       targetToolchain: stringArg('target-toolchain'),
       systemIncludeDirectories: stringArg('system-include-directories'),
     );
